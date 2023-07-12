@@ -1,0 +1,66 @@
+import random
+import smtplib
+import tkinter as tk
+from tkinter import messagebox
+
+generated_otp = None
+
+def send_otp(email):
+    global generated_otp
+    
+    server = smtplib.SMTP('smtp.gmail.com')
+    server.starttls()
+    email_address = 'youremail@gmail.com'
+    email_password = 'your_password'
+    server.login(email_address, email_password)
+    otp = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    message = f'Your OTP is {otp}'
+    server.sendmail(email_address, email, message)
+    server.quit()
+
+    generated_otp = otp
+
+def send_email_button():
+    email = entry_email.get()
+
+    if email == '':
+        messagebox.showwarning("Send Email", "Please enter an email address.")
+    else:
+        send_otp(email)
+        messagebox.showinfo("Send Email", f"An OTP has been sent to {email}.")
+
+def verify_otp_button():
+    user_input = entry_otp.get()
+
+    if user_input == '':
+        messagebox.showwarning("Verify OTP", "Please enter an OTP.")
+    elif generated_otp is None:
+        messagebox.showerror("Verify OTP", "No OTP generated. Please send an OTP first.")
+    elif user_input == generated_otp:
+        messagebox.showinfo("Verify OTP", "OTP verified successfully!")
+    else:
+        messagebox.showerror("Verify OTP", "Invalid OTP, please try again.")
+
+window = tk.Tk()
+window.title("OTP Verification")
+window.geometry("300x200")
+
+label_email = tk.Label(window, text="Email:")
+label_email.pack()
+
+entry_email = tk.Entry(window)
+entry_email.pack()
+
+button_send_email = tk.Button(window, text="Send Email", command=send_email_button)
+button_send_email.pack()
+
+label_otp = tk.Label(window, text="OTP:")
+label_otp.pack()
+
+entry_otp = tk.Entry(window)
+entry_otp.pack()
+
+button_verify_otp = tk.Button(window, text="Verify OTP", command=verify_otp_button)
+button_verify_otp.pack()
+
+window.mainloop()
